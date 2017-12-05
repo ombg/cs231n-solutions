@@ -112,7 +112,7 @@ def relu_forward(x):
     ###########################################################################
     # TODO: Implement the ReLU forward pass.                                  #
     ###########################################################################
-    pass
+    out = np.maximum(0.0, x)
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -135,7 +135,15 @@ def relu_backward(dout, cache):
     ###########################################################################
     # TODO: Implement the ReLU backward pass.                                 #
     ###########################################################################
-    pass
+    if x > 0.0:
+        dx = dout
+    else:
+        dx = np.zeros_like(dout)
+    #@online: Need the python way of saying "broadcast to all elements"
+    #Concretely, check if every value of x is positive or not.
+
+    # It is a simple function. Just store the derivative of max(0,x) for every element of the tensor.
+    # And the derivative is just 1(x > 0). Stell dir einfach die Funktion und ihre Ableitung vor. 
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
