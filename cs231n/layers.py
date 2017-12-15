@@ -133,15 +133,8 @@ def relu_backward(dout, cache):
     ###########################################################################
     # TODO: Implement the ReLU backward pass.                                 #
     ###########################################################################
-    if x > 0.0:
-        dx = dout
-    else:
-        dx = np.zeros_like(dout)
-    #@online: Need the python way of saying "broadcast to all elements"
-    #Concretely, check if every value of x is positive or not.
-
-    # It is a simple function. Just store the derivative of max(0,x) for every element of the tensor.
-    # And the derivative is just 1(x > 0). Stell dir einfach die Funktion und ihre Ableitung vor. 
+    #Asserts that dout.shape == x.shape:
+    dx = (x > 0.0) * dout # [df/dx * dL/df = 1(x>0) * dout]
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
