@@ -39,8 +39,7 @@ def affine_forward(x, w, b):
 
     x_rows = np.reshape(x, [rows, cols])
     
-    #Compute the forward pass
-    #out = np.maximum(0.0, x.dot(w) + b)
+    #Compute the forward pass, but no ReLU!
     out = x_rows.dot(w) + b
 
     ###########################################################################
@@ -82,12 +81,11 @@ def affine_backward(dout, cache):
     ###########################################################################
     # TODO: Implement the affine backward pass.                               #
     ###########################################################################
-    db = np.sum(dout, axis=0) # [dout/db * dL/dout ]
-    df = dout # [dout/db * dL/dout ]
+    df = dout # [dout/df * dL/dout = 1 * dout]
+    db = np.sum(dout, axis=0) # [dout/db * dL/dout = 1 * dout ]
     
-    dw = np.transpose(x_rows).dot(df) # [df/dw * dL/df ]
-    dx = df.dot(np.transpose(w)) # [df/dx * dL/df ]
-    #dx_T = w.dot(np.transpose(df)) # [df/dx * dL/df ]
+    dw = np.transpose(x_rows).dot(df) # [df/dw * dL/df = x * df]
+    dx = df.dot(np.transpose(w)) # [df/dx * dL/df = w * df]
     
     # Reshape dx to the original shape of x
     dx = np.reshape(dx, x.shape) 
