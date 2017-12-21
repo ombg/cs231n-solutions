@@ -584,15 +584,24 @@ def softmax_loss(x, y):
     - loss: Scalar giving the loss
     - dx: Gradient of the loss with respect to x
     """
+    #
     # 1. Compute the loss
+    #
+    # Shift all elements of x by max(x)
     shifted_logits = x - np.max(x, axis=1, keepdims=True)
+    #Exponentiate all elements of x and sum the result.
     Z = np.sum(np.exp(shifted_logits), axis=1, keepdims=True)
+    #Final step of  $$ L_i = -f_{y_i} + log ( \sum_j e^{f_j} ) $$ 
     log_probs = shifted_logits - np.log(Z)
+    #Cache probs for gradient computation
     probs = np.exp(log_probs)
     N = x.shape[0]
+    #Take negative sum of the loss for each training sample.
     loss = -np.sum(log_probs[np.arange(N), y]) / N
 
     # 2. Compute the gradient
+    # TODO
+    # It's done exactly like in http://cs231n.github.io/neural-networks-case-study/#loss
     dx = probs.copy()
     dx[np.arange(N), y] -= 1
     dx /= N
