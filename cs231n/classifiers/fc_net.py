@@ -47,7 +47,10 @@ class TwoLayerNet(object):
         # weights and biases using the keys 'W1' and 'b1' and second layer weights #
         # and biases using the keys 'W2' and 'b2'.                                 #
         ############################################################################
-        pass
+        self.params['W1'] = weight_scale * np.random.randn(input_dim, hidden_dim)
+        self.params['b1'] = np.zeros(hidden_dim)
+        self.params['W2'] = weight_scale * np.random.randn(hidden_dim, num_classes)
+        self.params['b2'] = np.zeros(num_classes)
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -77,7 +80,9 @@ class TwoLayerNet(object):
         # TODO: Implement the forward pass for the two-layer net, computing the    #
         # class scores for X and storing them in the scores variable.              #
         ############################################################################
-        pass
+        out, cache_xwb1 = affine_forward(X, self.params['W1'],self.params['b1'])
+        out, cache_x = relu_forward(out)
+        scores, cache_xwb2 = affine_forward(out, self.params['W2'],self.params['b2'])
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -97,7 +102,21 @@ class TwoLayerNet(object):
         # automated tests, make sure that your L2 regularization includes a factor #
         # of 0.5 to simplify the expression for the gradient.                      #
         ############################################################################
-        pass
+        data_loss, grads = softmax_loss(scores, y)
+        #Continue here: What should I do with grads? What does the jupyter notebook
+        # check? Check out this post on lambda functions
+        # https://pythonconquerstheuniverse.wordpress.com/2011/08/29/lambda_tutorial/
+
+        # Compute regularization loss and add to data loss
+        reg_loss = 0.0
+        for key, value in self.params.items():
+            #Check if key points to weight matrix and not to bias vector.
+            if value.ndim != 1:
+                W = self.params[key]
+                reg_loss += np.sum(W * W)
+    
+        reg_loss *= 0.5 * self.reg
+        loss = data_loss + reg_loss
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################

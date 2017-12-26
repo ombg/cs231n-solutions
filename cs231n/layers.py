@@ -599,10 +599,13 @@ def softmax_loss(x, y):
     #Take negative sum of the loss for each training sample.
     loss = -np.sum(log_probs[np.arange(N), y]) / N
 
+    #
     # 2. Compute the gradient
-    # TODO
-    # It's done exactly like in http://cs231n.github.io/neural-networks-case-study/#loss
+    #
+    # The partial derivative of probs[i,j] equals probs[i,j] if j!=y[i] 
+    # The partial derivative of probs[i,j] equals probs[i,j] - 1 if j==y[i] 
     dx = probs.copy()
     dx[np.arange(N), y] -= 1
+    # The constant factor 1/N remains when deriving the loss.
     dx /= N
     return loss, dx
