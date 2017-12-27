@@ -80,9 +80,9 @@ class TwoLayerNet(object):
         # TODO: Implement the forward pass for the two-layer net, computing the    #
         # class scores for X and storing them in the scores variable.              #
         ############################################################################
-        out, cache_xwb1 = affine_forward(X, self.params['W1'],self.params['b1'])
-        out, cache_x = relu_forward(out)
-        scores, cache_xwb2 = affine_forward(out, self.params['W2'],self.params['b2'])
+        z1, cache_x_w1_b1 = affine_forward(X, self.params['W1'],self.params['b1'])
+        a1, _ = relu_forward(z1)
+        scores, cache_a1_w2_b2 = affine_forward(a1, self.params['W2'],self.params['b2'])
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -102,10 +102,10 @@ class TwoLayerNet(object):
         # automated tests, make sure that your L2 regularization includes a factor #
         # of 0.5 to simplify the expression for the gradient.                      #
         ############################################################################
-        data_loss, grads = softmax_loss(scores, y)
+        # Compute data loss
+        data_loss, dscores = softmax_loss(scores, y)
         #Continue here: What should I do with grads? What does the jupyter notebook
-        # check? Check out this post on lambda functions
-        # https://pythonconquerstheuniverse.wordpress.com/2011/08/29/lambda_tutorial/
+        # check? 
 
         # Compute regularization loss and add to data loss
         reg_loss = 0.0
@@ -113,10 +113,28 @@ class TwoLayerNet(object):
             #Check if key points to weight matrix and not to bias vector.
             if value.ndim != 1:
                 W = self.params[key]
-                reg_loss += np.sum(W * W)
+                reg_loss += np.sum(W**2)
     
         reg_loss *= 0.5 * self.reg
         loss = data_loss + reg_loss
+
+        # Backward pass with computation of gradient
+        # Layer 2
+        #dx,dw,db = affine_backward(dscores, (X,self.params['W2'],self.params['b2']))
+        da1,dw2,db2 = affine_backward(dscores, cache_a1_w2_b2)
+        #dL/dw2: gradient of L2 regularization loss w2^2
+        dw2 += self.reg * self.params['W2']
+        grads['W2'] = dw2
+        grads['b2'] = db2
+
+        # Layer 1
+        dz1 = relu_backward(da1,a1)
+        dx,dw1,db1 = affine_backward(dz1, cache_x_w1_b1)
+        #dL/dw1: gradient of L2 regularization loss w1^2
+        dw1 += self.reg * self.params['W1']
+        grads['W1'] = dw1
+        grads['b1'] = db1
+
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
