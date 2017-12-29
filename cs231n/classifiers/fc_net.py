@@ -203,8 +203,8 @@ class FullyConnectedNet(object):
         self.params['b1'] = np.zeros(hidden_dims[0])
 
         for l in range(0,self.num_layers - 2):
-            self.params['W{}'.format(l+2)] = 
-                    weight_scale * np.random.randn(hidden_dims[l], hidden_dims[l+1])
+            self.params['W{}'.format(l+2)] = (weight_scale * 
+                                np.random.randn(hidden_dims[l], hidden_dims[l+1]))
             self.params['b{}'.format(l+2)] = np.zeros(hidden_dims[l+1])
 
         ############################################################################
@@ -264,10 +264,22 @@ class FullyConnectedNet(object):
         # self.bn_params[1] to the forward pass for the second batch normalization #
         # layer, etc.                                                              #
         ############################################################################
-        # TODO: for now, just copied the code from TwoLayerNet
-        z1, cache_x_w1_b1 = affine_forward(X, self.params['W1'],self.params['b1'])
-        a1, _ = relu_forward(z1)
-        scores, cache_a1_w2_b2 = affine_forward(a1, self.params['W2'],self.params['b2'])
+
+        scores = X
+        last_layer = self.num_layers - 1
+        cache = {}
+
+        #Loop over the weights matrices and bias vectors. Skip the last layer.
+        for l in range(1,self.num_layers):
+            z1, cache['c{}'.format(l)] = affine_forward(scores,
+                                                        self.params['W{}'.format(l)],
+                                                        self.params['b{}'.format(l)])
+            #Last layer without ReLU!
+            if l != last_layer:
+                scores, _ = relu_forward(z1)
+
+            print('layer: {}'.format(l))
+
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -290,7 +302,6 @@ class FullyConnectedNet(object):
         # automated tests, make sure that your L2 regularization includes a factor #
         # of 0.5 to simplify the expression for the gradient.                      #
         ############################################################################
-        # TODO: for now, just copied the code from TwoLayerNet
         # Compute data loss
         data_loss, dscores = softmax_loss(scores, y)
 
@@ -305,22 +316,24 @@ class FullyConnectedNet(object):
         reg_loss *= 0.5 * self.reg
         loss = data_loss + reg_loss
 
-        # Backward pass with computation of gradient
-        # Layer 2
-        #dx,dw,db = affine_backward(dscores, (X,self.params['W2'],self.params['b2']))
-        da1,dw2,db2 = affine_backward(dscores, cache_a1_w2_b2)
-        #dL/dw2: gradient of L2 regularization loss w2^2
-        dw2 += self.reg * self.params['W2']
-        grads['W2'] = dw2
-        grads['b2'] = db2
+#        # Backward pass with computation of gradient
+#        # Last layer
+#        da,dw,db = affine_backward(dscores, cache['c{}'.format(last_layer)])
+#        #dL/dw: gradient of L2 regularization loss w^2
+#        dw += self.reg * self.params['W{}'.format(last_layer)]
+#        grads['W{}'.format(last_layer)] = dw
+#        grads['b{}'.format(last_layer)] = db
 
-        # Layer 1
-        dz1 = relu_backward(da1,a1)
-        dx,dw1,db1 = affine_backward(dz1, cache_x_w1_b1)
-        #dL/dw1: gradient of L2 regularization loss w1^2
-        dw1 += self.reg * self.params['W1']
-        grads['W1'] = dw1
-        grads['b1'] = db1
+        da = dscores
+        #Run backwards through the layers [W(L-1),b(L-1),...,W(1),b(1)]
+        for l in range(last_layer, 0, -1):
+            if l !=last_layer:
+                da = relu_backward(da,cache['c{}'.format(l+1)][0])
+            da,dw,db = affine_backward(da,cache['c{}'.format(l)])
+            #dL/dw: gradient of L2 regularization loss w^2
+            dw += self.reg * self.params['W{}'.format(l)]
+            grads['W{}'.format(l)] = dw
+            grads['b{}'.format(l)] = db
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################

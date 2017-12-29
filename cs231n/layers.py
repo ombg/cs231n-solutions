@@ -88,6 +88,7 @@ def affine_backward(dout, cache):
     dx = df.dot(np.transpose(w)) # [df/dx * dL/df = w * df]
     
     # Reshape dx to the original shape of x
+    # Note: dx is needed if the current layer is not the first layer
     dx = np.reshape(dx, x.shape) 
     ###########################################################################
     #                             END OF YOUR CODE                            #
