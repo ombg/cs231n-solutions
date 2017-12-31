@@ -271,14 +271,12 @@ class FullyConnectedNet(object):
 
         #Loop over the weights matrices and bias vectors. Skip the last layer.
         for l in range(1,self.num_layers):
-            z1, cache['c{}'.format(l)] = affine_forward(scores,
+            scores, cache['c{}'.format(l)] = affine_forward(scores,
                                                         self.params['W{}'.format(l)],
                                                         self.params['b{}'.format(l)])
             #Last layer without ReLU!
             if l != last_layer:
-                scores, _ = relu_forward(z1)
-
-            print('layer: {}'.format(l))
+                scores, _ = relu_forward(scores)
 
         ############################################################################
         #                             END OF YOUR CODE                             #
@@ -316,19 +314,13 @@ class FullyConnectedNet(object):
         reg_loss *= 0.5 * self.reg
         loss = data_loss + reg_loss
 
-#        # Backward pass with computation of gradient
-#        # Last layer
-#        da,dw,db = affine_backward(dscores, cache['c{}'.format(last_layer)])
-#        #dL/dw: gradient of L2 regularization loss w^2
-#        dw += self.reg * self.params['W{}'.format(last_layer)]
-#        grads['W{}'.format(last_layer)] = dw
-#        grads['b{}'.format(last_layer)] = db
-
         da = dscores
         #Run backwards through the layers [W(L-1),b(L-1),...,W(1),b(1)]
         for l in range(last_layer, 0, -1):
+
             if l !=last_layer:
                 da = relu_backward(da,cache['c{}'.format(l+1)][0])
+
             da,dw,db = affine_backward(da,cache['c{}'.format(l)])
             #dL/dw: gradient of L2 regularization loss w^2
             dw += self.reg * self.params['W{}'.format(l)]
