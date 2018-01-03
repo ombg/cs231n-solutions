@@ -100,7 +100,11 @@ def rmsprop(x, dx, config=None):
     # in the next_x variable. Don't forget to update cache value stored in    #
     # config['cache'].                                                        #
     ###########################################################################
-    pass
+    config['cache'] =  ( config['decay_rate'] * config['cache'] +
+                                (1 - config['decay_rate'] ) * dx**2 ) 
+                                
+    next_x = ( x - config['learning_rate'] * dx / 
+                (np.sqrt(config['cache']) + config['epsilon']) ) 
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -137,7 +141,27 @@ def adam(x, dx, config=None):
     # the next_x variable. Don't forget to update the m, v, and t variables   #
     # stored in config.                                                       #
     ###########################################################################
-    pass
+
+    # Create some helper variables to make the code more readable
+    learning_rate = config['learning_rate']
+    beta1 = config['beta1']
+    beta2 = config['beta2']
+    eps = config['epsilon']
+    m = config['m']
+    v = config['v']
+    t = config['t']
+    m = beta1 * m + (1 - beta1 ) * dx
+    mt = m / (1-beta1**t)
+    v = beta2*v + (1-beta2) * (dx**2)
+    vt = v / (1-beta2**t)
+
+    #Update x
+    next_x = x - learning_rate * mt / (np.sqrt(vt) + eps)
+
+    #Copy local variables back into the dictionary.
+    config['m'] = m
+    config['t'] = t + 1
+    config['v'] = v
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
