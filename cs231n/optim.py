@@ -150,9 +150,13 @@ def adam(x, dx, config=None):
     m = config['m']
     v = config['v']
     t = config['t']
-    m = beta1 * m + (1 - beta1 ) * dx
+
+    m = beta1 * m + (1 - beta1 ) *  dx
+    v = beta2 * v + (1 - beta2 ) * (dx**2)
+
+    t = t + 1
+
     mt = m / (1-beta1**t)
-    v = beta2*v + (1-beta2) * (dx**2)
     vt = v / (1-beta2**t)
 
     #Update x
@@ -160,7 +164,7 @@ def adam(x, dx, config=None):
 
     #Copy local variables back into the dictionary.
     config['m'] = m
-    config['t'] = t + 1
+    config['t'] = t
     config['v'] = v
     ###########################################################################
     #                             END OF YOUR CODE                            #
