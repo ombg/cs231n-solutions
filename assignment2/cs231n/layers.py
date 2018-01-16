@@ -206,13 +206,10 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         # variables.                                                          #
         #######################################################################
         out = np.empty_like(x)
-        for col in range(x.shape[1]):
-            x_k = x[:,col] # current feature of mini batch. See BN paper.
-            mu = np.mean(x_k)
-            var = np.var(x_k)
-            x_norm = 1 / np.sqrt( var + eps ) * ( x_k - mu )
-            y_k = gamma[col] * x_norm + beta[col]
-            out = np.append(out, [y_k], axis=1)
+        mu = np.mean(x,axis=0)
+        var = np.var(x,axis=0)
+        x_norm = 1 / np.sqrt( var + eps ) * ( x - mu )
+        out = gamma * x_norm + beta
         #######################################################################
         #                           END OF YOUR CODE                          #
         #######################################################################
