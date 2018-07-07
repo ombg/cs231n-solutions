@@ -17,4 +17,5 @@ The `assignment<#>` directories have the same contents as the ZIP archives from 
    - Q5: PyTorch / TensorFlow on CIFAR-10
 
 ## Notes
-- There are some additional Python scripts, which have been automatically generated from the jupyter notebook with the same name. It was just added for debugging purposes.
+- As stated in the assignments, the solutions are either added to the Jupyter notebooks or to the Python source code. E.g. for Assignemnt 1, Question 1 run `assignemnt1/knn.ipynb` notebook and have a look at `assignment1/cs231n/classifiers/k_nearest_neighbor.py` to understand what is being computed.
+- There are some additional Python scripts, which I generated with the `jupyter nbconvert` command. I just needed it for debugging purposes.
