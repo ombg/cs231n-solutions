@@ -1,6 +1,12 @@
 
 # coding: utf-8
 
+#
+# This files has been automatically generated from a jupyter notebook using 
+# `jupyter nbconvert --to script <filename>.ipynb`
+# Additionally, I deactivated the ipython-inline-plotting stuff.
+#
+
 # # Multiclass Support Vector Machine exercise
 # 
 # *Complete and hand in this completed worksheet (including its outputs and any supporting code outside of the worksheet) with your assignment submission. For more details see the [assignments page](http://vision.stanford.edu/teaching/cs231n/assignments.html) on the course website.*
