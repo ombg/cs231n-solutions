@@ -4,8 +4,8 @@ The `assignment<#>` directories have the same contents as the ZIP archives from 
 
 - Assignment 1:
    - Q1: k-Nearest Neighbor classifier :white_check_mark: (except paragraph on Cross-validation)
-   - Q2: Training a Support Vector Machine 
-   - Q3: Implement a Softmax classifier 
+   - Q2: Training a Support Vector Machine :white_check_mark: 
+   - Q3: Implement a Softmax classifier :white_check_mark: 
    - Q4: Two-Layer Neural Network :white_check_mark:
    - Q5: Higher Level Representations: Image Features 
 
