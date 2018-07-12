@@ -1,6 +1,5 @@
 import numpy as np
 from past.builtins import xrange
-from ompy import ml
 
 class KNearestNeighbor(object):
   """ a kNN classifier with L2 distance """
