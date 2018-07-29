@@ -123,12 +123,22 @@ class KNearestNeighbor(object):
     # HINT: Try to formulate the l2 distance using matrix multiplication    #
     #       and two broadcast sums.                                         #
     #########################################################################
-    Y = self.X_train
 
-    XY = np.dot(X, Y.T)
-    XX = np.square(X).sum(axis=1)
-    YY = np.square(Y).sum(axis=1)
-    dists = np.sqrt(np.matrix(XX).T + YY - 2 * XY)
+    # The squared L2 distance can be formulated using the binomial formula
+    # ||X - Y ||^2 = ||X||^2 + ||Y||^2 - 2*XY
+
+    # Compute ||X||^2
+    X2 = np.sum(self.X_train ** 2,axis=1)
+    print('X2.shape {}'.format(X2.shape))
+    # Compute ||Y||^2
+    Y2 = np.sum(X ** 2,axis=1)
+    print('Y2.shape {}'.format(Y2.shape))
+    # Compute -2*XY
+    dists = np.dot(X,self.X_train.T) * -2
+    print('dists.shape {}'.format(dists.shape))
+    dists += X2
+    dists += Y2.reshape(num_test,-1)
+    dists = np.sqrt(dists)
     #########################################################################
     #                         END OF YOUR CODE                              #
     #########################################################################
