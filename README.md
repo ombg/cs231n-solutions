@@ -3,7 +3,7 @@
 The `assignment<#>` directories have the same contents as the ZIP archives from the cs231n course website. I try to to keep my completion record up to date:
 
 - Assignment 1:
-   - Q1: k-Nearest Neighbor classifier :white_check_mark: (except paragraph on Cross-validation)
+   - Q1: k-Nearest Neighbor classifier :white_check_mark:
    - Q2: Training a Support Vector Machine :white_check_mark: 
    - Q3: Implement a Softmax classifier :white_check_mark: 
    - Q4: Two-Layer Neural Network :white_check_mark:
