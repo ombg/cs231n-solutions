@@ -101,7 +101,7 @@ class TwoLayerNet(object):
     #############################################################################
 
     #Shift the values of f to avoid numeric instability
-    #f = scores - np.max(scores)
+    scores -= np.max(scores)
 
     #Compute the class probabilities
 
