@@ -7,7 +7,7 @@ The `assignment<#>` directories have the same contents as the ZIP archives from 
    - Q2: Training a Support Vector Machine :white_check_mark: 
    - Q3: Implement a Softmax classifier :white_check_mark: 
    - Q4: Two-Layer Neural Network :white_check_mark:
-   - Q5: Higher Level Representations: Image Features 
+   - Q5: Higher Level Representations: Image Features :white_check_mark:
 
 - Assignment 2:
    - Q1: Fully-connected Neural Network
