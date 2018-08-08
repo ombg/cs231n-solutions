@@ -27,17 +27,7 @@ def affine_forward(x, w, b):
     ###########################################################################
 
     #Reshape x into rows
-    rows = x.shape[0]
-    cols = 1
-
-    # Ok, this is obviously quite a dirty hack.
-    # But it works.
-    # TODO: Make pretty
-    for i in range(len(x.shape)):
-        if i > 0:
-            cols *= x.shape[i]
-
-    x_rows = np.reshape(x, [rows, cols])
+    x_rows = np.reshape(x, [x.shape[0],-1] )
     
     #Compute the forward pass, but no ReLU!
     out = x_rows.dot(w) + b
@@ -66,17 +56,7 @@ def affine_backward(dout, cache):
     """
     x, w, b = cache
     #Reshape x into rows
-    rows = x.shape[0]
-    cols = 1
-
-    # Ok, this is obviously quite a dirty hack.
-    # But it works.
-    # TODO: Make pretty
-    for i in range(len(x.shape)):
-        if i > 0:
-            cols *= x.shape[i]
-
-    x_rows = np.reshape(x, [rows, cols])
+    x_rows = np.reshape(x, [x.shape[0],-1] )
     dx, dw, db = None, None, None
     ###########################################################################
     # TODO: Implement the affine backward pass.                               #
