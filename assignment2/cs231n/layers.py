@@ -141,7 +141,6 @@ def batchnorm_forward(x, gamma, beta, bn_param):
     Note that the batch normalization paper suggests a different test-time
     behavior: they compute sample mean and variance for each feature using a
     large number of training images rather than using a running average. For
-    this implementation we have chosen to use running averages instead since
     they do not require an additional estimation step; the torch7
     implementation of batch normalization also uses running averages.
 
@@ -185,15 +184,18 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         # variance, storing your result in the running_mean and running_var   #
         # variables.                                                          #
         #######################################################################
-        out = np.empty_like(x)
-        mu = np.mean(x,axis=0)
-        var = np.var(x,axis=0)
-        x_norm = 1 / np.sqrt( var + eps ) * ( x - mu )
+        sample_mean = np.mean(x,axis=0)
+        sample_var = np.var(x,axis=0)
+        # Normalize
+        x_norm = (x - sample_mean) / np.sqrt( sample_var + eps )
+        # Scale and shift
         out = gamma * x_norm + beta
 
-        running_mean = momentum * running_mean + (1 - momentum) * mu
-        running_var = momentum * running_var + (1 - momentum) * var
-        #TODO cache = 
+        # Update running averages, see doc of this function.
+        running_mean = momentum * running_mean + (1 - momentum) * sample_mean
+        running_var = momentum * running_var + (1 - momentum) * sample_var
+        #TODO
+        cache = None
         #######################################################################
         #                           END OF YOUR CODE                          #
         #######################################################################
@@ -204,7 +206,12 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         # then scale and shift the normalized data using gamma and beta.      #
         # Store the result in the out variable.                               #
         #######################################################################
-        pass
+        # Normalize
+        x_norm = (x - running_mean) / np.sqrt( running_var + eps )
+        # Scale and shift
+        out = gamma * x_norm + beta
+        #TODO
+        cache = None
         #######################################################################
         #                          END OF YOUR CODE                           #
         #######################################################################
