@@ -188,14 +188,13 @@ def batchnorm_forward(x, gamma, beta, bn_param):
 
         # Compute variance manually in order to cache variables
         # for backward pass. In short, it does np.var(x, axis=0)
-        v = x - sample_mean
-        v2 = v**2
+        numerator = x - sample_mean
+        v2 = numerator**2
         sample_var = np.mean(v2) 
 
         # Normalize (and prepare intermediate variables for caching)
-        numerator = x - sample_mean
         sqt = np.sqrt( sample_var + eps )
-        overx =  1 / sq
+        overx =  1 / sqt
         x_norm = numerator * overx
 
         # Scale and shift
@@ -215,8 +214,6 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         cache['x'] = x
         cache['sqt'] = sqt
         cache['eps'] = eps
-        cache['v2'] = v2
-        cache['v'] = v
         #######################################################################
         #                           END OF YOUR CODE                          #
         #######################################################################
@@ -270,45 +267,59 @@ def batchnorm_backward(dout, cache):
     ###########################################################################
     n = dout.shape[0]
 
-    #Gradient of L with respect to beta
+    #Gradient of out with respect to beta
     dbeta = np.sum(dout,axis=0) # (dout * d/dbeta(x+beta)) = dout * 1
     
     # Upper branch of computational graph
-    #Gradient of L with respect to gamma*xnorm
+    #Gradient of out w.r.t. gamma*xnorm
     dgammaxnorm = dout 
 
     # x_norm * gamma => Gradient swap 
-    #Gradient of L with respect to gamma
+    #Gradient of out w.r.t. gamma
     dgamma = cache['xnorm'] * np.sum(dgammaxnorm,axis=0)
 
-    #Gradient of L with respect to xnorm
+    #Gradient of out w.r.t. xnorm
     dxnorm = cache['gamma'] * dgammaxnorm
 
-    # Gradient of L with respect to numerator: dxnorm * 1overx
-    dnumerator = dxnorm * cache['1overx']
-
-    # Gradient of L with respect to sample_mean
-    dsamplemean =  -1 * (dnumerator + dvar)
-
-    # Gradient of L with respect to x
-    dx = dnumerator + dvar #TODO plus sth depending on dsamplemean
+    # Gradient of out w.r.t. numerator: dxnorm * 1overx
+    # dnumerator_1.shape(N,D)
+    dnumerator_1 = dxnorm * cache['1overx']
 
     # Lower branch of computational graph
-    # Gradient of L with respect to 1/x: dxnorm * numerator
+    # Gradient of out w.r.t. 1/x: dxnorm * numerator
     d1overx = dxnorm * cache['numerator']
 
-    # Gradient of L with respect to sqrt(x+eps)
+    # Gradient of out w.r.t. sqrt(x+eps)
     dsq = d1overx * (-1) * cache['sqt']**(-2)
 
-    # Gradient of L with respect to sample_var (Gradient of L w.r.t. variance)
+    # Gradient of out w.r.t. sample_var (Gradient of out w.r.t. variance)
+    # dsamplevar.shape(D,)
     dsamplevar = dsq / (2 * (cache['samplevar'] + cache['eps']))  
 
-    # Gradient of L with respect to v2 (Backprop through np.mean)
-    dv2 = dsamplevar * np.ones_like(cache['v2']) * 1/n
+    # Gradient of out w.r.t. v2 (Backprop through np.mean)
+    # dv2.shape(N,D)
+    dv2 = dsamplevar * np.ones_like(cache['numerator']) * 1/n
 
-    # Gradient of L with respect to v (Backprop through x**2 term)
-    dv = dv2 * (-1) * cache['v']**(-2)
+    # Gradient of out w.r.t. v (Backprop through x**2 term)
+    # dnumerator_2.shape(N,D)
+    dnumerator_2 = dv2 * 2 * cache['numerator']
+
+    # Merge upper and lower branch
+
+    # Gradient of out w.r.t. samplemean
+    # (Backprop through subtract-gate)
+    dsamplemean = (dnumerator_1 + dnumerator_2) * (-1)
+
+    # Gradient of out w.r.t. x
+    # (Backprop through subtract-gate)
+    dx_1 = dnumerator_1 + dnumerator_2 # * (+1)
     
+    # Gradient of out w.r.t. x
+    # (Backprop through np.mean)
+    dx_2 = dsamplemean * np.ones_like(cache['x']) * 1/n
+
+    #Final gradient of out w.r.t. x (Yeah!)
+    dx = dx_1 + dx_2
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
