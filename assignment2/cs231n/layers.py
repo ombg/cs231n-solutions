@@ -167,7 +167,7 @@ def batchnorm_forward(x, gamma, beta, bn_param):
     running_mean = bn_param.get('running_mean', np.zeros(D, dtype=x.dtype))
     running_var = bn_param.get('running_var', np.zeros(D, dtype=x.dtype))
 
-    out, cache = None, None
+    out, cache = None, {}
     if mode == 'train':
         #######################################################################
         # TODO: Implement the training-time forward pass for batch norm.      #
@@ -187,15 +187,27 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         sample_mean = np.mean(x,axis=0)
         sample_var = np.var(x,axis=0)
         # Normalize
-        x_norm = (x - sample_mean) / np.sqrt( sample_var + eps )
+        numerator = x - sample_mean
+        sq = np.sqrt( sample_var + eps )
+        overx =  1 / sq
+        x_norm = numerator * overx
         # Scale and shift
         out = gamma * x_norm + beta
 
         # Update running averages, see doc of this function.
         running_mean = momentum * running_mean + (1 - momentum) * sample_mean
         running_var = momentum * running_var + (1 - momentum) * sample_var
-        #TODO
-        cache = None
+
+        # Cache intermediate variables
+        cache['xnorm'] = x_norm
+        cache['gamma'] = gamma
+        cache['numerator'] = numerator
+        cache['1overx'] = overx
+        cache['samplemean'] = sample_mean
+        cache['samplevar'] = sample_var
+        cache['x'] = x
+        cache['sq'] = sq
+        cache['eps'] = eps
         #######################################################################
         #                           END OF YOUR CODE                          #
         #######################################################################
@@ -247,7 +259,30 @@ def batchnorm_backward(dout, cache):
     # TODO: Implement the backward pass for batch normalization. Store the    #
     # results in the dx, dgamma, and dbeta variables.                         #
     ###########################################################################
-    pass
+    # In the following out == L
+
+    dbeta = dout # (dout * d/dbeta(x+beta)) = dout * 1
+
+    # x_norm * gamma => Gradient swap 
+    dgamma = cache['xnorm'] * dout
+    dxnorm = cache['gamma'] * dout
+
+    # Gradient of L with respect to 1/x: dxnorm * numerator
+    d1overx = dxnorm * cache['numerator']
+
+    # Gradient of L with respect to sqrt(x+eps)
+    dsq = d1overx * (-1) * cache['sq']**(-2)
+
+    dsq2 =dsq / (2 * (x + cache['eps']))  
+
+    # Gradient of L with respect to numerator: dxnorm * 1overx
+    dnumerator = dxnorm * cache['1overx']
+
+    # Gradient of L with respect to sample_mean
+    dsamplemean =  -1 * (dnumerator + dvar)
+
+    # Gradient of L with respect to x
+    dx = dnumerator + dvar # plus sth depending on dsamplemean
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
