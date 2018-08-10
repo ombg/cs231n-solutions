@@ -185,16 +185,23 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         # variables.                                                          #
         #######################################################################
         sample_mean = np.mean(x,axis=0)
-        sample_var = np.var(x,axis=0)
-        # Normalize
+
+        # Compute variance manually in order to cache variables
+        # for backward pass. In short, it does np.var(x, axis=0)
+        v = x - sample_mean
+        v2 = v**2
+        sample_var = np.mean(v2) 
+
+        # Normalize (and prepare intermediate variables for caching)
         numerator = x - sample_mean
-        sq = np.sqrt( sample_var + eps )
+        sqt = np.sqrt( sample_var + eps )
         overx =  1 / sq
         x_norm = numerator * overx
+
         # Scale and shift
         out = gamma * x_norm + beta
 
-        # Update running averages, see doc of this function.
+        # Update running averages for test time, see doc of this function.
         running_mean = momentum * running_mean + (1 - momentum) * sample_mean
         running_var = momentum * running_var + (1 - momentum) * sample_var
 
@@ -206,8 +213,10 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         cache['samplemean'] = sample_mean
         cache['samplevar'] = sample_var
         cache['x'] = x
-        cache['sq'] = sq
+        cache['sqt'] = sqt
         cache['eps'] = eps
+        cache['v2'] = v2
+        cache['v'] = v
         #######################################################################
         #                           END OF YOUR CODE                          #
         #######################################################################
@@ -259,21 +268,21 @@ def batchnorm_backward(dout, cache):
     # TODO: Implement the backward pass for batch normalization. Store the    #
     # results in the dx, dgamma, and dbeta variables.                         #
     ###########################################################################
-    # In the following out == L
+    n = dout.shape[0]
 
-    dbeta = dout # (dout * d/dbeta(x+beta)) = dout * 1
+    #Gradient of L with respect to beta
+    dbeta = np.sum(dout,axis=0) # (dout * d/dbeta(x+beta)) = dout * 1
+    
+    # Upper branch of computational graph
+    #Gradient of L with respect to gamma*xnorm
+    dgammaxnorm = dout 
 
     # x_norm * gamma => Gradient swap 
-    dgamma = cache['xnorm'] * dout
-    dxnorm = cache['gamma'] * dout
+    #Gradient of L with respect to gamma
+    dgamma = cache['xnorm'] * np.sum(dgammaxnorm,axis=0)
 
-    # Gradient of L with respect to 1/x: dxnorm * numerator
-    d1overx = dxnorm * cache['numerator']
-
-    # Gradient of L with respect to sqrt(x+eps)
-    dsq = d1overx * (-1) * cache['sq']**(-2)
-
-    dsq2 =dsq / (2 * (x + cache['eps']))  
+    #Gradient of L with respect to xnorm
+    dxnorm = cache['gamma'] * dgammaxnorm
 
     # Gradient of L with respect to numerator: dxnorm * 1overx
     dnumerator = dxnorm * cache['1overx']
@@ -282,7 +291,24 @@ def batchnorm_backward(dout, cache):
     dsamplemean =  -1 * (dnumerator + dvar)
 
     # Gradient of L with respect to x
-    dx = dnumerator + dvar # plus sth depending on dsamplemean
+    dx = dnumerator + dvar #TODO plus sth depending on dsamplemean
+
+    # Lower branch of computational graph
+    # Gradient of L with respect to 1/x: dxnorm * numerator
+    d1overx = dxnorm * cache['numerator']
+
+    # Gradient of L with respect to sqrt(x+eps)
+    dsq = d1overx * (-1) * cache['sqt']**(-2)
+
+    # Gradient of L with respect to sample_var (Gradient of L w.r.t. variance)
+    dsamplevar = dsq / (2 * (cache['samplevar'] + cache['eps']))  
+
+    # Gradient of L with respect to v2 (Backprop through np.mean)
+    dv2 = dsamplevar * np.ones_like(cache['v2']) * 1/n
+
+    # Gradient of L with respect to v (Backprop through x**2 term)
+    dv = dv2 * (-1) * cache['v']**(-2)
+    
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
