@@ -5,6 +5,7 @@ import numpy as np
 from cs231n.layers import *
 from cs231n.layer_utils import *
 
+import pdb
 
 class TwoLayerNet(object):
     """
@@ -199,17 +200,19 @@ class FullyConnectedNet(object):
         # parameters should be initialized to zero.                                #
         ############################################################################
 
-        self.params['W1'] = weight_scale * np.random.randn(input_dim, hidden_dims[0])
-        self.params['b1'] = np.zeros(hidden_dims[0])
+        # TODO check layer dims and data types
+        # Create a Python list of all NN layers
+        layers = [input_dim] + hidden_dims + [num_classes]
+        L = len(layers) 
+        assert self.num_layers == L-1
 
-        for l in range(0,self.num_layers - 2):
-            self.params['W{}'.format(l+2)] = (weight_scale * 
-                                np.random.randn(hidden_dims[l], hidden_dims[l+1]))
-            self.params['b{}'.format(l+2)] = np.zeros(hidden_dims[l+1])
+        Ws = { 'W' + str(l+1) : 
+                weight_scale * np.random.randn(layers[l], layers[l + 1])
+                for l in range(L-1) }
+        bs = { 'b' + str(l+1) : np.zeros(layers[l]) for l in range(L-1) }
 
-        ############################################################################
-        #                             END OF YOUR CODE                             #
-        ############################################################################
+        self.params.update(Ws)
+        self.params.update(bs)
 
         # When using dropout we need to pass a dropout_param dictionary to each
         # dropout layer so that the layer knows the dropout probability and the mode
@@ -267,6 +270,7 @@ class FullyConnectedNet(object):
 
         scores = X
         last_layer = self.num_layers - 1
+        #pdb.set_trace()
         cache = {}
 
         #Loop over the weights matrices and bias vectors. Skip the last layer.
