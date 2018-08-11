@@ -280,7 +280,7 @@ def batchnorm_backward(dout, cache):
     dgamma = np.sum(dgammaxnorm * cache['xnorm'], axis=0)
 
     #Gradient of out w.r.t. xnorm
-    dxnorm = cache['gamma'] * dgammaxnorm
+    dxnorm = dgammaxnorm * cache['gamma'] 
 
     # Gradient of out w.r.t. numerator: dxnorm * 1overx
     # dnumerator_1.shape(N,D)
@@ -288,7 +288,7 @@ def batchnorm_backward(dout, cache):
 
     # Lower branch of computational graph
     # Gradient of out w.r.t. 1/x: dxnorm * numerator
-    d1overx = dxnorm * cache['numerator']
+    d1overx = np.sum(dxnorm * cache['numerator'],axis=0)
 
     # Gradient of out w.r.t. sqrt(x+eps)
     dsq = d1overx * (-1.) * cache['sqt']**(-2.)
@@ -309,7 +309,7 @@ def batchnorm_backward(dout, cache):
 
     # Gradient of out w.r.t. samplemean
     # (Backprop through subtract-gate)
-    dsamplemean = (dnumerator_1 + dnumerator_2) * (-1.)
+    dsamplemean = np.sum(dnumerator_1 + dnumerator_2,axis=0) * (-1.)
 
     # Gradient of out w.r.t. x
     # (Backprop through subtract-gate)
