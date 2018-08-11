@@ -211,10 +211,8 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         cache['numerator'] = numerator
         cache['1overx'] = overx
         cache['samplemean'] = sample_mean
-        cache['samplevar'] = sample_var
         cache['x'] = x
         cache['sqt'] = sqt
-        cache['eps'] = eps
         #######################################################################
         #                           END OF YOUR CODE                          #
         #######################################################################
@@ -291,11 +289,11 @@ def batchnorm_backward(dout, cache):
     d1overx = np.sum(dxnorm * cache['numerator'],axis=0)
 
     # Gradient of out w.r.t. sqrt(x+eps)
-    dsq = d1overx * (-1.) * cache['sqt']**(-2.)
+    dsq = -1. / (cache['sqt']**2) * d1overx 
 
     # Gradient of out w.r.t. sample_var (Gradient of out w.r.t. variance)
     # dsamplevar.shape(D,)
-    dsamplevar = dsq / (2. * (cache['samplevar'] + cache['eps']))  
+    dsamplevar = dsq / (2. * cache['sqt'])  
 
     # Gradient of out w.r.t. v2 (Backprop through np.mean)
     # dv2.shape(N,D)
