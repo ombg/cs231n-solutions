@@ -277,7 +277,7 @@ def batchnorm_backward(dout, cache):
 
     # x_norm * gamma => Gradient swap 
     #Gradient of out w.r.t. gamma
-    dgamma = cache['xnorm'] * np.sum(dgammaxnorm,axis=0)
+    dgamma = np.sum(dgammaxnorm * cache['xnorm'], axis=0)
 
     #Gradient of out w.r.t. xnorm
     dxnorm = cache['gamma'] * dgammaxnorm
