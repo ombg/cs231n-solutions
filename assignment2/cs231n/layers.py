@@ -184,25 +184,26 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         # variance, storing your result in the running_mean and running_var   #
         # variables.                                                          #
         #######################################################################
+
         sample_mean = np.mean(x,axis=0)
 
         # Compute variance manually in order to cache variables
         # for backward pass. In short, it does np.var(x, axis=0)
         numerator = x - sample_mean
         v2 = numerator**2
-        sample_var = np.mean(v2) 
+        sample_var = np.mean(v2,axis=0)
 
         # Normalize (and prepare intermediate variables for caching)
         sqt = np.sqrt( sample_var + eps )
-        overx =  1 / sqt
-        x_norm = numerator * overx
+        overx =  1. / sqt
+        x_norm = overx * numerator 
 
         # Scale and shift
         out = gamma * x_norm + beta
 
         # Update running averages for test time, see doc of this function.
-        running_mean = momentum * running_mean + (1 - momentum) * sample_mean
-        running_var = momentum * running_var + (1 - momentum) * sample_var
+        running_mean = momentum * running_mean + (1. - momentum) * sample_mean
+        running_var = momentum * running_var + (1. - momentum) * sample_var
 
         # Cache intermediate variables
         cache['xnorm'] = x_norm
@@ -290,25 +291,25 @@ def batchnorm_backward(dout, cache):
     d1overx = dxnorm * cache['numerator']
 
     # Gradient of out w.r.t. sqrt(x+eps)
-    dsq = d1overx * (-1) * cache['sqt']**(-2)
+    dsq = d1overx * (-1.) * cache['sqt']**(-2.)
 
     # Gradient of out w.r.t. sample_var (Gradient of out w.r.t. variance)
     # dsamplevar.shape(D,)
-    dsamplevar = dsq / (2 * (cache['samplevar'] + cache['eps']))  
+    dsamplevar = dsq / (2. * (cache['samplevar'] + cache['eps']))  
 
     # Gradient of out w.r.t. v2 (Backprop through np.mean)
     # dv2.shape(N,D)
-    dv2 = dsamplevar * np.ones_like(cache['numerator']) * 1/n
+    dv2 = dsamplevar * np.ones_like(cache['numerator']) * 1./n
 
     # Gradient of out w.r.t. v (Backprop through x**2 term)
     # dnumerator_2.shape(N,D)
-    dnumerator_2 = dv2 * 2 * cache['numerator']
+    dnumerator_2 = dv2 * 2. * cache['numerator']
 
     # Merge upper and lower branch
 
     # Gradient of out w.r.t. samplemean
     # (Backprop through subtract-gate)
-    dsamplemean = (dnumerator_1 + dnumerator_2) * (-1)
+    dsamplemean = (dnumerator_1 + dnumerator_2) * (-1.)
 
     # Gradient of out w.r.t. x
     # (Backprop through subtract-gate)
@@ -316,7 +317,7 @@ def batchnorm_backward(dout, cache):
     
     # Gradient of out w.r.t. x
     # (Backprop through np.mean)
-    dx_2 = dsamplemean * np.ones_like(cache['x']) * 1/n
+    dx_2 = dsamplemean * np.ones_like(cache['x']) * 1./n
 
     #Final gradient of out w.r.t. x (Yeah!)
     dx = dx_1 + dx_2
