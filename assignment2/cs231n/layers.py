@@ -26,11 +26,12 @@ def affine_forward(x, w, b):
     # will need to reshape the input into rows.                               #
     ###########################################################################
 
-    #Reshape x into rows
-    x_rows = np.reshape(x, [x.shape[0],-1] )
-    
+    #Reshape x into rows and perform bias trick
+    x_rows = np.c_[ np.reshape(x, [x.shape[0],-1] ), np.ones(x.shape[0]) ]
+    wb = np.r_[w, b[np.newaxis]]
+
     #Compute the forward pass, but no ReLU!
-    out = x_rows.dot(w) + b
+    out = x_rows.dot(wb)
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
