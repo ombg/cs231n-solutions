@@ -5,7 +5,6 @@ import numpy as np
 from cs231n.layers import *
 from cs231n.layer_utils import *
 
-
 class TwoLayerNet(object):
     """
     A two-layer fully-connected neural network with ReLU nonlinearity and
@@ -199,18 +198,19 @@ class FullyConnectedNet(object):
         # parameters should be initialized to zero.                                #
         ############################################################################
 
-        self.params['W1'] = weight_scale * np.random.randn(input_dim, hidden_dims[0])
-        self.params['b1'] = np.zeros(hidden_dims[0])
+        # TODO check layer dims and data types
+        # Create a Python list of all NN layers
+        layers = [input_dim] + hidden_dims + [num_classes]
+        L = len(layers) 
+        assert self.num_layers == L-1
 
-        for l in range(0,self.num_layers - 2):
-            self.params['W{}'.format(l+2)] = (weight_scale * 
-                                np.random.randn(hidden_dims[l], hidden_dims[l+1]))
-            self.params['b{}'.format(l+2)] = np.zeros(hidden_dims[l+1])
+        Ws = { 'W' + str(l+1) : 
+                weight_scale * np.random.randn(layers[l], layers[l + 1])
+                for l in range(L-1) }
+        bs = { 'b' + str(l+1) : np.zeros(layers[l+1]) for l in range(L-1) }
 
-        for m in self.params:
-            print('{}: {}'.format(m,self.params[m].shape))
-#        for v in bs:
-#            print('{}: {}'.format(v,self.params[v].shape))
+        self.params.update(Ws)
+        self.params.update(bs)
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -269,17 +269,20 @@ class FullyConnectedNet(object):
         # layer, etc.                                                              #
         ############################################################################
 
+        for m in self.params:
+            print('{}: {}'.format(m,self.params[m].shape))
+
         scores = X
-        last_layer = self.num_layers - 1
         cache = {}
+        L = self.num_layers + 1
 
         #Loop over the weights matrices and bias vectors. Skip the last layer.
-        for l in range(1,self.num_layers):
-            scores, cache['c{}'.format(l)] = affine_forward(scores,
-                                                        self.params['W{}'.format(l)],
-                                                        self.params['b{}'.format(l)])
+        for l in range(L-1):
+            scores, cache['c{}'.format(l+1)] = affine_forward(scores,
+                                                        self.params['W{}'.format(l+1)],
+                                                        self.params['b{}'.format(l+1)])
             #Last layer without ReLU!
-            if l != last_layer:
+            if l != L-2:
                 scores, _ = relu_forward(scores)
 
         ############################################################################
