@@ -207,6 +207,10 @@ class FullyConnectedNet(object):
                                 np.random.randn(hidden_dims[l], hidden_dims[l+1]))
             self.params['b{}'.format(l+2)] = np.zeros(hidden_dims[l+1])
 
+        for m in self.params:
+            print('{}: {}'.format(m,self.params[m].shape))
+#        for v in bs:
+#            print('{}: {}'.format(v,self.params[v].shape))
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
