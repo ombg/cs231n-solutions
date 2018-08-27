@@ -269,9 +269,6 @@ class FullyConnectedNet(object):
         # layer, etc.                                                              #
         ############################################################################
 
-        for m in self.params:
-            print('{}: {}'.format(m,self.params[m].shape))
-
         scores = X
         cache = {}
         L = self.num_layers + 1
@@ -323,9 +320,9 @@ class FullyConnectedNet(object):
 
         da = dscores
         #Run backwards through the layers [W(L-1),b(L-1),...,W(1),b(1)]
-        for l in range(last_layer, 0, -1):
+        for l in range(L-1, 0, -1):
 
-            if l !=last_layer:
+            if l != L-1:
                 da = relu_backward(da,cache['c{}'.format(l+1)][0])
 
             da,dw,db = affine_backward(da,cache['c{}'.format(l)])
