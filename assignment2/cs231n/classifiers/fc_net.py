@@ -5,8 +5,6 @@ import numpy as np
 from cs231n.layers import *
 from cs231n.layer_utils import *
 
-import pdb
-
 class TwoLayerNet(object):
     """
     A two-layer fully-connected neural network with ReLU nonlinearity and
@@ -209,7 +207,7 @@ class FullyConnectedNet(object):
         Ws = { 'W' + str(l+1) : 
                 weight_scale * np.random.randn(layers[l], layers[l + 1])
                 for l in range(L-1) }
-        bs = { 'b' + str(l+1) : np.zeros(layers[l]) for l in range(L-1) }
+        bs = { 'b' + str(l+1) : np.zeros(layers[l+1]) for l in range(L-1) }
 
         self.params.update(Ws)
         self.params.update(bs)
@@ -268,18 +266,20 @@ class FullyConnectedNet(object):
         # layer, etc.                                                              #
         ############################################################################
 
+        for m in self.params:
+            print('{}: {}'.format(m,self.params[m].shape))
+
         scores = X
-        last_layer = self.num_layers - 1
-        #pdb.set_trace()
         cache = {}
+        L = self.num_layers + 1
 
         #Loop over the weights matrices and bias vectors. Skip the last layer.
-        for l in range(1,self.num_layers):
-            scores, cache['c{}'.format(l)] = affine_forward(scores,
-                                                        self.params['W{}'.format(l)],
-                                                        self.params['b{}'.format(l)])
+        for l in range(L-1):
+            scores, cache['c{}'.format(l+1)] = affine_forward(scores,
+                                                        self.params['W{}'.format(l+1)],
+                                                        self.params['b{}'.format(l+1)])
             #Last layer without ReLU!
-            if l != last_layer:
+            if l != L-2:
                 scores, _ = relu_forward(scores)
 
         ############################################################################
