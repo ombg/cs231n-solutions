@@ -115,7 +115,7 @@ def relu_backward(dout, cache):
     ###########################################################################
     # TODO: Implement the ReLU backward pass.                                 #
     ###########################################################################
-    #Asserts that dout.shape == x.shape:
+    assert dout.shape == x.shape
     dx = (x > 0.0) * dout # [df/dx * dL/df = 1(x>0) * dout]
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -228,8 +228,6 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         x_norm = (x - running_mean) / np.sqrt( running_var + eps )
         # Scale and shift
         out = gamma * x_norm + beta
-        #TODO
-        cache = None
         #######################################################################
         #                          END OF YOUR CODE                           #
         #######################################################################
