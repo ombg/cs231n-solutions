@@ -5,6 +5,7 @@ import numpy as np
 from cs231n.layers import *
 from cs231n.layer_utils import *
 
+import pdb
 class TwoLayerNet(object):
     """
     A two-layer fully-connected neural network with ReLU nonlinearity and
@@ -238,10 +239,10 @@ class FullyConnectedNet(object):
                                'running_var': np.zeros(layers[l+1]) }
                                for l in range(L - 2)]
             
-            gammas = {'gamma{}'.format(l) : np.ones(layers[l+1])
-                      for l in range(L - 2)}
-            betas = {'beta{}'.format(l) : np.zeros(layers[l+1])
-                      for l in range(L - 2)}
+            gammas = {'gamma{}'.format(l) : np.ones(layers[l])
+                      for l in range(1,L - 1)}
+            betas = {'beta{}'.format(l) : np.zeros(layers[l])
+                      for l in range(1,L - 1)}
             self.params.update(gammas)
             self.params.update(betas)
 
@@ -292,6 +293,7 @@ class FullyConnectedNet(object):
                                                self.params['b{}'.format(l+1)])
             else:
                 if self.use_batchnorm:
+                    #pdb.set_trace()
                     scores, cache['c'+str(l+1)] = affine_bn_relu_forward(scores,
                                                    self.params['W{}'.format(l+1)],
                                                    self.params['b{}'.format(l+1)],
