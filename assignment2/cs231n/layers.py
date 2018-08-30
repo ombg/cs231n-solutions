@@ -436,6 +436,7 @@ def dropout_backward(dout, cache):
         #######################################################################
         # TODO: Implement training phase backward pass for inverted dropout   #
         #######################################################################
+        # (dx == dout) if the neuron was active during the forward pass.
         dx = dout * mask
         #######################################################################
         #                          END OF YOUR CODE                           #
