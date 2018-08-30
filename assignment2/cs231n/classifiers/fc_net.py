@@ -231,7 +231,19 @@ class FullyConnectedNet(object):
         # pass of the second batch normalization layer, etc.
         self.bn_params = []
         if self.use_batchnorm:
-            self.bn_params = [{'mode': 'train'} for i in range(self.num_layers - 1)]
+            self.bn_params = [{'mode': 'train',
+                               #'eps': 1e-5, #this is the place to init custom eps, momentum
+                               #'momentum': 0.9,
+                               'running_mean': np.zeros(layers[l+1]),
+                               'running_var': np.zeros(layers[l+1]) }
+                               for l in range(L - 2)]
+            
+            gammas = {'gamma{}'.format(l) : np.ones(layers[l+1])
+                      for l in range(L - 2)}
+            betas = {'beta{}'.format(l) : np.zeros(layers[l+1])
+                      for l in range(L - 2)}
+            self.params.update(gammas)
+            self.params.update(betas)
 
         # Cast all parameters to the correct datatype
         for k, v in self.params.items():
@@ -271,17 +283,25 @@ class FullyConnectedNet(object):
 
         scores = X
         cache = {}
-        L = self.num_layers + 1
+        L = self.num_layers + 1 # To keep it consistent with __init__()
 
-        #Loop over the weights matrices and bias vectors. Skip the last layer.
         for l in range(L-1):
-            scores, cache['c{}'.format(l+1)] = affine_forward(scores,
-                                                        self.params['W{}'.format(l+1)],
-                                                        self.params['b{}'.format(l+1)])
-            #Last layer without ReLU!
-            if l != L-2:
-                scores, _ = relu_forward(scores)
-
+            if l == L-2:
+                scores, cache['c'+str(l+1)] = affine_forward(scores,
+                                               self.params['W{}'.format(l+1)],
+                                               self.params['b{}'.format(l+1)])
+            else:
+                if self.use_batchnorm:
+                    scores, cache['c'+str(l+1)] = affine_bn_relu_forward(scores,
+                                                   self.params['W{}'.format(l+1)],
+                                                   self.params['b{}'.format(l+1)],
+                                                   self.params['gamma{}'.format(l+1)],
+                                                   self.params['beta{}'.format(l+1)],
+                                                   self.bn_params[l])
+                else:
+                    scores, cache['c'+str(l+1)] = affine_relu_forward(scores,
+                                                   self.params['W{}'.format(l+1)],
+                                                   self.params['b{}'.format(l+1)])
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -311,6 +331,7 @@ class FullyConnectedNet(object):
         reg_loss = 0.0
         for key, value in self.params.items():
             #Check if key points to weight matrix and not to bias vector.
+            #TODO Dangerous
             if value.ndim != 1:
                 W = self.params[key]
                 reg_loss += np.sum(W**2)
@@ -321,11 +342,18 @@ class FullyConnectedNet(object):
         da = dscores
         #Run backwards through the layers [W(L-1),b(L-1),...,W(1),b(1)]
         for l in range(L-1, 0, -1):
+            if l == L-1:
+                da,dw,db = affine_backward(da, cache['c'+ str(l)])
 
-            if l != L-1:
-                da = relu_backward(da,cache['c{}'.format(l+1)][0])
-
-            da,dw,db = affine_backward(da,cache['c{}'.format(l)])
+            else:
+                if self.use_batchnorm:
+                    da, dw, db, dgamma, dbeta = affine_bn_relu_backward(da,
+                                                    cache['c'+str(l)])
+                    grads['gamma{}'.format(l)] = dgamma
+                    grads['beta{}'.format(l)] = dbeta
+                else:
+                    da, dw, db = affine_relu_backward(da,cache['c'+str(l)])
+    
             #dL/dw: gradient of L2 regularization loss w^2
             dw += self.reg * self.params['W{}'.format(l)]
             grads['W{}'.format(l)] = dw
@@ -335,3 +363,18 @@ class FullyConnectedNet(object):
         ############################################################################
 
         return loss, grads
+
+# The course lecturers want to have the helper functions here and not in layer_utils.py
+def affine_bn_relu_forward(x, w, b, gamma, beta, bn_param):
+    a, fc_cache = affine_forward(x, w, b)
+    a_out, bn_cache = batchnorm_forward(a, gamma, beta, bn_param)
+    out, relu_cache = relu_forward(a_out)
+    cache = (fc_cache, bn_cache, relu_cache)
+    return out, cache
+
+def affine_bn_relu_backward(dout, cache):
+    fc_cache, bn_cache, relu_cache = cache
+    dn = relu_backward(dout, relu_cache)
+    da, dgamma, dbeta = batchnorm_backward(dn, bn_cache)
+    dx, dw, db = affine_backward(da, fc_cache)
+    return dx, dw, db, dgamma, dbeta
