@@ -11,7 +11,7 @@ The `assignment<#>` directories have the same contents as the ZIP archives from 
 
 - Assignment 2:
    - Q1: Fully-connected Neural Network
-   - Q2: Batch Normalization
+   - Q2: Batch Normalization :white_check_mark:
    - Q3: Dropout
    - Q4: Convolutional Networks
    - Q5: PyTorch / TensorFlow on CIFAR-10
