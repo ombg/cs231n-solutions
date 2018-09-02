@@ -10,12 +10,11 @@ The `assignment<#>` directories have the same contents as the ZIP archives from 
    - Q5: Higher Level Representations: Image Features :white_check_mark:
 
 - Assignment 2:
-   - Q1: Fully-connected Neural Network
+   - Q1: Fully-connected Neural Network :white_check_mark:
    - Q2: Batch Normalization :white_check_mark:
-   - Q3: Dropout
+   - Q3: Dropout :white_check_mark:
    - Q4: Convolutional Networks
    - Q5: PyTorch / TensorFlow on CIFAR-10
 
 ## Notes
 - As stated in the assignments, the solutions are either added to the Jupyter notebooks or to the Python source code. E.g. for Assignment 1, Question 1 run `assignment1/knn.ipynb` notebook and have a look at `assignment1/cs231n/classifiers/k_nearest_neighbor.py` to understand what is being computed.
-- There are some additional Python scripts, which I generated with the `jupyter nbconvert` command. I just needed it for debugging purposes.
