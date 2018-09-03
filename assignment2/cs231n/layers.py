@@ -485,7 +485,7 @@ def conv_forward_naive(x, w, b, conv_param):
     o_cols = 1 + (W + 2 * P - WW) // S # Output volume height
 
     #Allocate output volume
-    out = np.zeros( (N,F, o_rows, o_cols) )
+    out = np.zeros( (N, F, o_rows, o_cols) )
 
     #Zero padding along width and height of input volume
     x_pad = np.pad(x,((0,),(0,),(P,),(P,)),'constant')
@@ -522,7 +522,17 @@ def conv_backward_naive(dout, cache):
     ###########################################################################
     # TODO: Implement the convolutional backward pass.                        #
     ###########################################################################
-    pass
+    x, w, b, conv_param = cache
+    P = conv_param['pad']
+    S = conv_param['stride']
+    N, F, o_rows, o_cols = dout.shape
+    dx = np.zeros_like(x)
+    dw = np.zeros_like(w)
+    db = np.zeros_like(b)
+    for n in range(N):
+        for f in range(F):
+            dx[n,:,:,:] = w[f,:,:,:]
+            db[n] = dout[n]
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
