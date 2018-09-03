@@ -1,7 +1,6 @@
 from builtins import range
 import numpy as np
 
-
 def affine_forward(x, w, b):
     """
     Computes the forward pass for an affine (fully-connected) layer.
@@ -445,7 +444,6 @@ def dropout_backward(dout, cache):
         dx = dout
     return dx
 
-
 def conv_forward_naive(x, w, b, conv_param):
     """
     A naive implementation of the forward pass for a convolutional layer.
@@ -475,13 +473,29 @@ def conv_forward_naive(x, w, b, conv_param):
     # Hint: you can use the function np.pad for padding.                      #
     ###########################################################################
     # x = 2 3 4 4
-    N = x.shape[0] # number of data points
+    N = x.shape[0] 
+    H = x.shape[2] 
+    W = x.shape[3] 
+    S = conv_param['stride'] 
     P = conv_param['pad']
+    F = w.shape[0] 
+    HH = w.shape[2] # Filter height
+    WW = w.shape[3] # Filter width
+    o_rows = 1 + (H + 2 * P - HH) // S # Output volume height
+    o_cols = 1 + (W + 2 * P - WW) // S # Output volume height
 
-    np.pad(x,((0,),(0,),(P,),(P,)),'constant')
-    for n in range(
-            x_pad = np.pad(x[n,:,:,:],conv_param['pad'],'constant')
-    v[0,0,0] = np.sum(x[0:HH,0:WW,:] * w0] + b0
+    #Allocate output volume
+    out = np.zeros( (N,F, o_rows, o_cols) )
+
+    #Zero padding along width and height of input volume
+    x_pad = np.pad(x,((0,),(0,),(P,),(P,)),'constant')
+
+    for n in range(N): # Loop over images
+        for f in range(F): # The fibre - Loop over all filters.
+            for o_r in range(o_rows): 
+                for o_c in range(o_cols):
+                    out[n,f,o_r,o_c] = np.sum(
+                            x_pad[n,:, S*o_r:S*o_r+HH, S*o_c:o_c*S+WW] * w[f,:,:,:]) + b[f]
 
     
     ###########################################################################
