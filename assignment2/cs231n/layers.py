@@ -525,6 +525,7 @@ def conv_backward_naive(dout, cache):
     x, w, b, conv_param = cache
     P = conv_param['pad']
     S = conv_param['stride']
+    F, C, HH, WW = w.shape
     N, F, o_rows, o_cols = dout.shape
     dx = np.zeros_like(x)
     dw = np.zeros_like(w)
@@ -540,10 +541,13 @@ def conv_backward_naive(dout, cache):
 
     # dw with dimensions (F,C,HH,WW)
     for f in range(F):
-        for f_r in range(HH):
-            for f_c in range(WW):
-                #x_rec_field = x_pad[:, :, f_r:S*o_r+HH, S*o_c:o_c*S+WW] * w[f,:,:,:]) + b[f]
-                #dw[f,:,f_r,f_c] = 
+        for c_c in range(C):
+            for f_r in range(HH):
+                for f_c in range(WW):
+                    # Inner gradient: Get the pixels which are connected to your weights
+                    x_rec_field = x_pad[:, c_c, f_r:f_r+o_rows*S:S, f_c:f_c+o_rows*S:S]
+                    # Multiply inner with outer gradient
+                    dw[f,c_c,f_r,f_c] = np.sum( dout[:,f,:,:] * x_rec_field )
     
     ###########################################################################
     #                             END OF YOUR CODE                            #
