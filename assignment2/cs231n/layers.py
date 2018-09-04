@@ -529,10 +529,22 @@ def conv_backward_naive(dout, cache):
     dx = np.zeros_like(x)
     dw = np.zeros_like(w)
     db = np.zeros_like(b)
+
+    # Again zero padding. We must use same input volume as we used for forw pass
+    x_pad = np.pad(x,((0,),(0,),(P,),(P,)),'constant')
+
+    # db with dimensions (F,)
     for n in range(N):
         for f in range(F):
-            dx[n,:,:,:] = w[f,:,:,:]
-            db[n] = dout[n]
+            db[f] = np.sum(dout[:,f,:,:])
+
+    # dw with dimensions (F,C,HH,WW)
+    for f in range(F):
+        for f_r in range(HH):
+            for f_c in range(WW):
+                #x_rec_field = x_pad[:, :, f_r:S*o_r+HH, S*o_c:o_c*S+WW] * w[f,:,:,:]) + b[f]
+                #dw[f,:,f_r,f_c] = 
+    
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
