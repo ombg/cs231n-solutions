@@ -472,7 +472,6 @@ def conv_forward_naive(x, w, b, conv_param):
     # TODO: Implement the convolutional forward pass.                         #
     # Hint: you can use the function np.pad for padding.                      #
     ###########################################################################
-    # x = 2 3 4 4
     N = x.shape[0] 
     H = x.shape[2] 
     W = x.shape[3] 
@@ -545,7 +544,8 @@ def conv_backward_naive(dout, cache):
             for f_r in range(HH):
                 for f_c in range(WW):
                     # Inner gradient: Get the pixels which are connected to your weights
-                    x_rec_field = x_pad[:, c_c, f_r:f_r+o_rows*S:S, f_c:f_c+o_rows*S:S]
+                    # In the input volume we need a sliding window of the filter size
+                    x_rec_field = x_pad[:, c_c, f_r:f_r+o_rows*S:S, f_c:f_c+o_cols*S:S]
                     # Multiply inner with outer gradient
                     dw[f,c_c,f_r,f_c] = np.sum( dout[:,f,:,:] * x_rec_field )
     
