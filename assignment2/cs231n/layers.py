@@ -571,8 +571,10 @@ def conv_backward_naive(dout, cache):
                     # In general: dx_n = w * d_out
                     # Activate  same receptive field in dx_n which was active 
                     # in forw pass. Then, get dout and multiply with every w[f].
-                    dx_n[:, row_start:row_end,
-                            col_start:col_end] += w[f] * dout[n,f,o_r,o_c]
+                    dx_n[:,
+                         row_start:row_end,
+                         col_start:col_end] += w[f] * dout[n,f,o_r,o_c]
+
         dx[n] = dx_n[:,P:-P,P:-P]
     
     ###########################################################################
@@ -600,7 +602,27 @@ def max_pool_forward_naive(x, pool_param):
     ###########################################################################
     # TODO: Implement the max pooling forward pass                            #
     ###########################################################################
-    pass
+    N, C, H, W = x.shape
+    HH = pool_param['pool_height']
+    WW = pool_param['pool_width']
+    S  = pool_param['stride']
+    
+    #Shape and allocation of output volume
+    o_rows = 1 + (H - HH) // S
+    o_cols = 1 + (W - WW) // S
+    out = np.zeros((N, C, o_rows, o_cols))
+
+    for n in range(N):
+        for o_r in range(o_rows): 
+            for o_c in range(o_cols):
+                # Same sliding window as in conv_forward_naive()
+                # But, max() is computed independently for each depth slice
+                # Sth. like np.max(x[n,:,...]) doesn't work
+                for c in range(C):
+                    out[n,c,o_r,o_c] = np.max(x[n,
+                                                c,
+                                                S*o_r:S*o_r+HH,
+                                                S*o_c:S*o_c+WW])
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
