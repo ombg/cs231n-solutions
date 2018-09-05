@@ -1,6 +1,7 @@
 from builtins import range
 import numpy as np
 
+import pdb
 def affine_forward(x, w, b):
     """
     Computes the forward pass for an affine (fully-connected) layer.
@@ -645,7 +646,30 @@ def max_pool_backward_naive(dout, cache):
     ###########################################################################
     # TODO: Implement the max pooling backward pass                           #
     ###########################################################################
-    pass
+    x, pool_param = cache
+    N, C, H, W = x.shape
+    N, C, o_rows, o_cols = dout.shape
+    HH = pool_param['pool_height']
+    WW = pool_param['pool_width']
+    S  = pool_param['stride']
+    o_rows = 1 + (H - HH) // S
+    o_cols = 1 + (W - WW) // S
+    dx = np.zeros_like(x)
+
+    for n in range(N):
+        for o_r in range(o_rows): 
+            for o_c in range(o_cols):
+                for c in range(C):
+                    #pdb.set_trace()
+                    #Retrieve position of max(x).This is where the gradient flows to.
+                    idx = np.unravel_index(np.argmax(x[n,
+                                                    c,
+                                                    S*o_r:S*o_r+HH,
+                                                    S*o_c:S*o_c+WW]),
+                                                    x.shape)
+                    dx[idx] = dout[n,c,o_r,o_c]
+    
+
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
