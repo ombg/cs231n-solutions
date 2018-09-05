@@ -564,9 +564,9 @@ def conv_backward_naive(dout, cache):
             for o_c in range(o_cols):
                 # Get the receptive field w/ *_start and *_end
                 row_start = o_r * S
-                row_end = o_r + HH
+                row_end   = o_r * S + HH
                 col_start = o_c * S
-                col_end = o_c + WW
+                col_end   = o_c * S + WW
                 for f in range(F):
                     # In general: dx_n = w * d_out
                     # Activate  same receptive field in dx_n which was active 
