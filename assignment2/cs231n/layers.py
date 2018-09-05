@@ -525,7 +525,10 @@ def conv_backward_naive(dout, cache):
     P = conv_param['pad']
     S = conv_param['stride']
     F, C, HH, WW = w.shape
+    N, C, H, W = x.shape
     N, F, o_rows, o_cols = dout.shape
+
+    # Allocate memory to hold the derivatives
     dx = np.zeros_like(x)
     dw = np.zeros_like(w)
     db = np.zeros_like(b)
@@ -544,10 +547,33 @@ def conv_backward_naive(dout, cache):
             for f_r in range(HH):
                 for f_c in range(WW):
                     # Inner gradient: Get the pixels which are connected to your weights
-                    # In the input volume we need a sliding window of the filter size
+                    # We need a sliding window of the filter size in the input volume.
                     x_rec_field = x_pad[:, c_c, f_r:f_r+o_rows*S:S, f_c:f_c+o_cols*S:S]
                     # Multiply inner with outer gradient
                     dw[f,c_c,f_r,f_c] = np.sum( dout[:,f,:,:] * x_rec_field )
+
+    # dx with dimensions (N, C, H, W)
+    for n in range(N):
+        # We need the same matrix x we used in the forward pass => Add zero padding
+        x_n = np.pad( x[n], [(0, 0), (P, P), (P, P)],'constant')
+        # Same goes for dx
+        dx_n = np.pad( dx[n], [(0, 0), (P, P), (P, P)],'constant')
+
+        # loop over the output volume
+        for o_r in range(o_rows): 
+            for o_c in range(o_cols):
+                # Get the receptive field w/ *_start and *_end
+                row_start = o_r * S
+                row_end = o_r + HH
+                col_start = o_c * S
+                col_end = o_c + WW
+                for f in range(F):
+                    # In general: dx_n = w * d_out
+                    # Activate  same receptive field in dx_n which was active 
+                    # in forw pass. Then, get dout and multiply with every w[f].
+                    dx_n[:, row_start:row_end,
+                            col_start:col_end] += w[f] * dout[n,f,o_r,o_c]
+        dx[n] = dx_n[:,P:-P,P:-P]
     
     ###########################################################################
     #                             END OF YOUR CODE                            #
