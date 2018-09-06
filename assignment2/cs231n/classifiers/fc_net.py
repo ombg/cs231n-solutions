@@ -108,7 +108,7 @@ class TwoLayerNet(object):
         reg_loss = 0.0
         for key, value in self.params.items():
             #Check if key points to weight matrix and not to bias vector.
-            if value.ndim != 1:
+            if key.startswith('W') and key[1].isnumeric():
                 W = self.params[key]
                 reg_loss += np.sum(W**2)
     
