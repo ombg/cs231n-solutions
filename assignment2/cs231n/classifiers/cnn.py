@@ -95,7 +95,40 @@ class ThreeLayerConvNet(object):
         # data loss using softmax, and make sure that grads[k] holds the gradients #
         # for self.params[k]. Don't forget to add L2 regularization!               #
         ############################################################################
-        pass
+        # Compute data loss
+        data_loss, dscores = softmax_loss(scores, y)
+
+        # Compute regularization loss and add to data loss
+        reg_loss = 0.0
+
+        for key, value in self.params.items():
+            #Check if key points to weight matrix and not to bias vector.
+            if key.startswith('W') and key[1].isnumeric():
+                W = self.params[key]
+                reg_loss += np.sum(W**2)
+    
+        reg_loss *= 0.5 * self.reg
+        loss = data_loss + reg_loss
+
+        # Backward pass with computation of gradient
+        # Conv layer
+        #dx,dw,db = affine_backward(dscores, (X,self.params['W2'],self.params['b2']))
+        # TODO get cached stuff from forw pass
+        da1, dw1, db1 = conv_relu_pool_backward(dscores, cache)
+        da2, dw2, db2 = affine_relu_backward(da1, cache_a1_w2_b2)
+        #TODO da3, dw3, db3 = affine_backward(da1, cache_a1_w2_b2)
+        #dL/dw2: gradient of L2 regularization loss w2^2
+        dw2 += self.reg * self.params['W2']
+        grads['W2'] = dw2
+        grads['b2'] = db2
+
+        # Layer 1
+        dz1 = relu_backward(da1,a1)
+        dx,dw1,db1 = affine_backward(dz1, cache_x_w1_b1)
+        #dL/dw1: gradient of L2 regularization loss w1^2
+        dw1 += self.reg * self.params['W1']
+        grads['W1'] = dw1
+        grads['b1'] = db1
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
