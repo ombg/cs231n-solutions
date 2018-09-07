@@ -147,20 +147,23 @@ class ThreeLayerConvNet(object):
         loss = data_loss + reg_loss
 
         # Backward pass with computation of gradient
-        # Conv layer
-        #dx,dw,db = affine_backward(dscores, (X,self.params['W2'],self.params['b2']))
-        # TODO get cached stuff from forw pass
-        da1, dw1, db1 = conv_relu_pool_backward(dscores, cache)
-        da2, dw2, db2 = affine_relu_backward(da1, cache_a1_w2_b2)
-        #TODO da3, dw3, db3 = affine_backward(da1, cache_a1_w2_b2)
+        # Output layer
+        da3, dw3, db3 = affine_backward(dscores, aff_cache)
+        #dL/dw3: gradient of L2 regularization loss w3^2
+        dw3 += self.reg * self.params['W3']
+        grads['W3'] = dw3
+        grads['b3'] = db3
+
+        # Hidden layer
+        da2, dw2, db2 = affine_relu_backward(da3, aff_relu_cache)
         #dL/dw2: gradient of L2 regularization loss w2^2
         dw2 += self.reg * self.params['W2']
         grads['W2'] = dw2
         grads['b2'] = db2
 
-        # Layer 1
-        dz1 = relu_backward(da1,a1)
-        dx,dw1,db1 = affine_backward(dz1, cache_x_w1_b1)
+        # Conv Layer
+        dx, dw1, db1 = conv_relu_pool_backward(da2, conv_cache)
+
         #dL/dw1: gradient of L2 regularization loss w1^2
         dw1 += self.reg * self.params['W1']
         grads['W1'] = dw1
