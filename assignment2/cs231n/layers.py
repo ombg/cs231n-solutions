@@ -707,7 +707,7 @@ def spatial_batchnorm_forward(x, gamma, beta, bn_param):
     # version of batch normalization defined above. Your implementation should#
     # be very short; ours is less than five lines.                            #
     ###########################################################################
-    # The idea is to convert x to a two-dimensional matrix. Then we can feed it
+    # The idea is to convert x to a two-dimensional matrix in order to be feeded
     # to the vanilla BN function. The description in the Jupyter notebook gives
     # gives us a hint that the image statistics are consistent both along N
     # and along (H,W).
@@ -751,7 +751,16 @@ def spatial_batchnorm_backward(dout, cache):
     # version of batch normalization defined above. Your implementation should#
     # be very short; ours is less than five lines.                            #
     ###########################################################################
-    pass
+    N, C, H, W = dout.shape
+    dout = dout.swapaxes(0,1)
+    dout = dout.reshape(C, -1)
+    dout = dout.T
+    dx, dgamma, dbeta = batchnorm_backward(dout, cache)
+
+    # Reshape out to the original shape of x.
+    dx = dx.T
+    dx = dx.reshape((C,N,H,W))
+    dx = dx.swapaxes(0,1)
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
