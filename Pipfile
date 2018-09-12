@@ -1,0 +1,28 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+appnope = "*"
+backcall = "*"
+future = "*"
+gnureadline = "*"
+"h5py" = "*"
+jedi = "*"
+jupyter = "*"
+matplotlib = "*"
+nltk = "*"
+requests = "*"
+scipy = "*"
+singledispatch = "*"
+"backports.ssl_match_hostname" = "*"
+Cython = "*"
+prometheus_client = "*"
+tensorflow = "*"
+
+[dev-packages]
+bpython = "*"
+
+[requires]
+python_version = "3.6"
