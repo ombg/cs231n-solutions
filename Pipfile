@@ -20,9 +20,11 @@ singledispatch = "*"
 Cython = "*"
 prometheus_client = "*"
 tensorflow = "*"
+imageio = "*"
 
 [dev-packages]
 bpython = "*"
+ipdb = "*"
 
 [requires]
 python_version = "3.6"
