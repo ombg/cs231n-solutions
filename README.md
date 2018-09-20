@@ -14,7 +14,7 @@ The `assignment<#>` directories have the same contents as the ZIP archives from 
    - Q2: Batch Normalization :heavy_check_mark:
    - Q3: Dropout :heavy_check_mark:
    - Q4: Convolutional Networks :heavy_check_mark:
-   - Q5: PyTorch / TensorFlow on CIFAR-10
+   - Q5: PyTorch / TensorFlow on CIFAR-10 :heavy_check_mark:
 
 ## Notes
 - As stated in the assignments, the solutions are either added to the Jupyter notebooks or to the Python source code. E.g. for Assignment 1, Question 1 run `assignment1/knn.ipynb` notebook and have a look at `assignment1/cs231n/classifiers/k_nearest_neighbor.py` to understand what is being computed.
