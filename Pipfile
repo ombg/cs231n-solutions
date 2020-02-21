@@ -19,12 +19,12 @@ singledispatch = "*"
 "backports.ssl_match_hostname" = "*"
 Cython = "*"
 prometheus_client = "*"
-tensorflow = "*"
 imageio = "*"
 
 [dev-packages]
 bpython = "*"
 ipdb = "*"
+"flake8" = "*"
 
 [requires]
 python_version = "3.6"
