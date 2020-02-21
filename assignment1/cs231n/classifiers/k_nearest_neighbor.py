@@ -77,7 +77,7 @@ class KNearestNeighbor(object):
                 #####################################################################
                 # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-                pass
+                dists[i, j] = np.sqrt(np.sum(np.power(X[i] - self.X_train[j],2)))
 
                 # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         return dists
@@ -101,7 +101,7 @@ class KNearestNeighbor(object):
             #######################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-            pass
+            dists[i, :] = np.sqrt(np.sum(np.power(X[i] - self.X_train,2),axis=-1))
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         return dists
@@ -131,7 +131,18 @@ class KNearestNeighbor(object):
         #########################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        # The squared L2 distance can be formulated using the binomial formula
+        # ||X - Y ||^2 = ||X||^2 + ||Y||^2 - 2*XY
+
+        # Compute ||X||^2
+        X2 = np.sum(self.X_train ** 2,axis=1)
+        # Compute ||Y||^2
+        Y2 = np.sum(X ** 2,axis=1)
+        # Compute -2*XY
+        dists = np.dot(X,self.X_train.T) * -2
+        dists += X2
+        dists += Y2.reshape(num_test,-1)
+        dists = np.sqrt(dists)
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         return dists
@@ -164,7 +175,7 @@ class KNearestNeighbor(object):
             #########################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-            pass
+            closest_y = self.y_train[ np.argsort(dists[i,:])[0:k]]
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
             #########################################################################
