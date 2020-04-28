@@ -580,6 +580,7 @@
                 "sha256:f1baa54d50ec031d1a9beb89974108f8f2c0706f49798f4777df879df0e1adb6",
                 "sha256:f53a5385932cda1e2c862d89460992911a89768c65d176ff8c50cddca4d29bed"
             ],
+            "index": "pypi",
             "version": "==6.2.0"
         },
         "prometheus-client": {
